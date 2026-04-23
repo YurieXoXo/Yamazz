@@ -7,6 +7,7 @@ import Index from "@/pages/Index";
 import Support from "@/pages/Support";
 import ProductDetail from "@/pages/ProductDetail";
 import NotFound from "@/pages/NotFound";
+import Admin from "@/pages/Admin";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -27,6 +28,15 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Admin />
             </ProtectedRoute>
           }
         />
