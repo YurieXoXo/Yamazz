@@ -36,10 +36,10 @@ const Index = () => {
             </span>
 
             <div className="my-4 max-w-[640px]">
-              <h1 className="m-0 text-[clamp(3rem,8vw,6rem)] font-black leading-[0.88] tracking-[-0.085em]">
-                <span className="block text-gradient-brand">The Best</span>
-                <span className="block text-gradient-brand">solution for</span>
-                <span className="block text-gradient-brand">your tools.</span>
+              <h1 className="m-0 text-[clamp(3rem,8vw,6rem)] font-black leading-[1.02] tracking-[-0.06em] py-1">
+                <span className="block text-gradient-brand pb-1">The Best</span>
+                <span className="block text-gradient-brand pb-1">solution for</span>
+                <span className="block text-gradient-brand pb-2">your tools.</span>
               </h1>
               <p className="mt-5 max-w-[560px] text-base leading-relaxed text-muted-foreground">
                 Premium game enhancement tools with daily updates, fair pricing, and a safety-first approach. Your main account stays protected.

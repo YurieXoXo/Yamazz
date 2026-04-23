@@ -1,8 +1,19 @@
-import { Link, NavLink } from "react-router-dom";
-import { LayoutDashboard, LifeBuoy, LogIn, UserPlus } from "lucide-react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { LayoutDashboard, LifeBuoy, LogIn, LogOut, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const SiteHeader = () => {
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({ title: "Signed out", description: "See you soon." });
+    navigate("/");
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className="absolute inset-0 -z-10 bg-background/70 backdrop-blur-xl border-b border-border" />
@@ -39,18 +50,27 @@ const SiteHeader = () => {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-            <Link to="/login">
-              <LogIn className="h-4 w-4" />
-              Login
-            </Link>
-          </Button>
-          <Button asChild size="sm" className="bg-gradient-cta text-primary-foreground shadow-glow hover:opacity-90">
-            <Link to="/signup">
-              <UserPlus className="h-4 w-4" />
-              Sign up
-            </Link>
-          </Button>
+          {user ? (
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4" />
+              Sign out
+            </Button>
+          ) : (
+            <>
+              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+                <Link to="/login">
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Link>
+              </Button>
+              <Button asChild size="sm" className="bg-gradient-cta text-primary-foreground shadow-glow hover:opacity-90">
+                <Link to="/signup">
+                  <UserPlus className="h-4 w-4" />
+                  Sign up
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
