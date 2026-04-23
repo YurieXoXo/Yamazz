@@ -1,98 +1,224 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import SiteHeader from "@/components/SiteHeader";
 import SiteOrbs from "@/components/SiteOrbs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LifeBuoy } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/hooks/use-toast";
 
-const Support = () => {
-  const [submitted, setSubmitted] = useState(false);
+type Ticket = {
+  id: string;
+  subject: string;
+  message: string;
+  status: "open" | "closed";
+  created_at: string;
+};
 
-  const handleSubmit = (e: React.FormEvent) => {
+const Support = () => {
+  const { user, loading } = useAuth();
+
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loadingTickets, setLoadingTickets] = useState(true);
+
+  const fetchTickets = async () => {
+    if (!user) {
+      setTickets([]);
+      setLoadingTickets(false);
+      return;
+    }
+
+    setLoadingTickets(true);
+
+    const { data, error } = await supabase
+      .from("support_tickets")
+      .select("id, subject, message, status, created_at")
+      .order("created_at", { ascending: false });
+
+    setLoadingTickets(false);
+
+    if (error) {
+      toast({
+        title: "Failed to load tickets",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setTickets((data as Ticket[]) || []);
+  };
+
+  useEffect(() => {
+    if (!loading) {
+      fetchTickets();
+    }
+  }, [loading, user]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    toast({ title: "Ticket submitted", description: "We'll respond within 5 minutes on average." });
+
+    if (!user) {
+      toast({
+        title: "You need to sign in",
+        description: "Please log in before sending a support request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!subject.trim() || !message.trim()) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in both subject and message.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSending(true);
+
+    const { error } = await supabase.from("support_tickets").insert({
+      user_id: user.id,
+      email: user.email || "unknown",
+      subject: subject.trim(),
+      message: message.trim(),
+      status: "open",
+    });
+
+    setSending(false);
+
+    if (error) {
+      toast({
+        title: "Failed to send ticket",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Ticket sent",
+      description: "Your support request was submitted successfully.",
+    });
+
+    setSubject("");
+    setMessage("");
+    fetchTickets();
   };
 
   return (
     <div className="relative min-h-screen">
       <SiteOrbs />
       <SiteHeader />
-      <main className="relative mx-auto w-full max-w-3xl px-4 py-12 md:px-6">
-        <div className="flex items-center gap-3">
-          <span className="grid h-12 w-12 place-items-center rounded-2xl border border-border bg-secondary shadow-glow">
-            <LifeBuoy className="h-5 w-5 text-accent" />
-          </span>
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight md:text-4xl">
-              <span className="text-gradient-brand">Support</span>
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">Open a ticket and our team will get back to you fast.</p>
-          </div>
+
+      <main className="relative mx-auto w-full max-w-[1280px] px-4 py-12 md:px-6">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+            <span className="text-gradient-brand">Support</span>
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Need help? Send a ticket and we’ll review it in the admin panel.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-3xl border border-border bg-gradient-panel p-6 shadow-elegant md:p-8">
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <Label htmlFor="name">Your name</Label>
-              <Input id="name" placeholder="John Doe" className="mt-1.5" required />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="you@example.com" className="mt-1.5" required />
-            </div>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <Label>Product</Label>
-              <Select defaultValue="csgo-2">
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="csgo-2">CSGO 2</SelectItem>
-                  <SelectItem value="valorant">Valorant</SelectItem>
-                  <SelectItem value="arc-raiders">Arc Raiders</SelectItem>
-                  <SelectItem value="roblox">Roblox</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Priority</Label>
-              <Select defaultValue="normal">
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="urgent">Urgent</SelectItem>
-                </SelectContent>
-              </Select>
+        {!user && !loading ? (
+          <div className="mt-8 rounded-3xl border border-border bg-gradient-panel p-8 shadow-elegant">
+            <p className="text-muted-foreground">
+              You need to be logged in to create a support ticket.
+            </p>
+            <div className="mt-4">
+              <Button asChild>
+                <Link to="/login">Go to login</Link>
+              </Button>
             </div>
           </div>
+        ) : null}
 
-          <div>
-            <Label htmlFor="subject">Subject</Label>
-            <Input id="subject" placeholder="Brief summary of your issue" className="mt-1.5" required />
+        <section className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-3xl border border-border bg-gradient-panel p-6 shadow-elegant">
+            <h2 className="text-2xl font-extrabold tracking-tight">
+              Create ticket
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Describe the issue clearly so support can help you faster.
+            </p>
+
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <Input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="Subject"
+                className="h-12 rounded-2xl"
+                disabled={!user || sending}
+              />
+
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Explain your issue..."
+                className="min-h-[180px] w-full rounded-2xl border border-input bg-background px-3 py-3 text-sm outline-none"
+                disabled={!user || sending}
+              />
+
+              <Button
+                type="submit"
+                disabled={!user || sending}
+                className="h-12 w-full rounded-2xl bg-gradient-cta text-primary-foreground shadow-glow"
+              >
+                {sending ? "Sending..." : "Send ticket"}
+              </Button>
+            </form>
           </div>
 
-          <div>
-            <Label htmlFor="message">Message</Label>
-            <Textarea id="message" rows={6} placeholder="Describe the issue in detail..." className="mt-1.5" required />
-          </div>
+          <div className="rounded-3xl border border-border bg-gradient-panel p-6 shadow-elegant">
+            <h2 className="text-2xl font-extrabold tracking-tight">
+              Your tickets
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              View all tickets submitted from your account.
+            </p>
 
-          <Button type="submit" size="lg" className="w-full bg-gradient-cta text-primary-foreground shadow-glow md:w-auto">
-            {submitted ? "Submit another ticket" : "Submit ticket"}
-          </Button>
-        </form>
+            <div className="mt-6 space-y-4">
+              {loadingTickets ? (
+                <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                  Loading tickets...
+                </div>
+              ) : tickets.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                  No tickets yet.
+                </div>
+              ) : (
+                tickets.map((ticket) => (
+                  <div
+                    key={ticket.id}
+                    className="rounded-2xl border border-border bg-card/50 p-5"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <h3 className="text-lg font-bold">{ticket.subject}</h3>
+                      <span className="rounded-full border border-border px-3 py-1 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {ticket.status}
+                      </span>
+                    </div>
+
+                    <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">
+                      {ticket.message}
+                    </p>
+
+                    <div className="mt-4 text-xs text-muted-foreground">
+                      Created: {new Date(ticket.created_at).toLocaleString()}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
