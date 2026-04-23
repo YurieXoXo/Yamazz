@@ -83,20 +83,26 @@ const Support = () => {
 
     setSending(true);
 
-    const { error } = await supabase.from("support_tickets").insert({
-      user_id: user.id,
-      email: user.email || "unknown",
-      subject: subject.trim(),
-      message: message.trim(),
-      status: "open",
+    const { data, error } = await supabase.rpc("create_support_ticket", {
+      input_subject: subject.trim(),
+      input_message: message.trim(),
     });
 
     setSending(false);
 
     if (error) {
       toast({
-        title: "Failed to send ticket",
+        title: "Failed to create ticket",
         description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!data?.success) {
+      toast({
+        title: "Failed to create ticket",
+        description: data?.message || "Unknown error",
         variant: "destructive",
       });
       return;
@@ -123,7 +129,7 @@ const Support = () => {
             <span className="text-gradient-brand">Support</span>
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Need help? Send a ticket and we’ll review it in the admin panel.
+            Need help? Open a ticket and chat with support.
           </p>
         </div>
 
@@ -146,7 +152,7 @@ const Support = () => {
               Create ticket
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Describe the issue clearly so support can help you faster.
+              Start a conversation with support.
             </p>
 
             <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
@@ -171,7 +177,7 @@ const Support = () => {
                 disabled={!user || sending}
                 className="h-12 w-full rounded-2xl bg-gradient-cta text-primary-foreground shadow-glow"
               >
-                {sending ? "Sending..." : "Send ticket"}
+                {sending ? "Sending..." : "Create ticket"}
               </Button>
             </form>
           </div>
@@ -181,7 +187,7 @@ const Support = () => {
               Your tickets
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              View all tickets submitted from your account.
+              Open a ticket to view and continue the conversation.
             </p>
 
             <div className="mt-6 space-y-4">
@@ -206,12 +212,14 @@ const Support = () => {
                       </span>
                     </div>
 
-                    <p className="mt-3 whitespace-pre-wrap text-sm text-muted-foreground">
-                      {ticket.message}
-                    </p>
-
                     <div className="mt-4 text-xs text-muted-foreground">
                       Created: {new Date(ticket.created_at).toLocaleString()}
+                    </div>
+
+                    <div className="mt-4">
+                      <Button asChild variant="outline" className="rounded-2xl">
+                        <Link to={`/support/${ticket.id}`}>Open ticket</Link>
+                      </Button>
                     </div>
                   </div>
                 ))
