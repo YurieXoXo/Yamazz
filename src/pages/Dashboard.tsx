@@ -1,7 +1,11 @@
 import SiteHeader from "@/components/SiteHeader";
 import SiteOrbs from "@/components/SiteOrbs";
-import { Activity, Download, Key, Wallet } from "lucide-react";
+import { Activity, Download, Key, Wallet, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const stats = [
   { label: "Active licenses", value: "0", icon: Key },
@@ -12,42 +16,99 @@ const stats = [
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const displayName = (user?.user_metadata?.username as string) || user?.email?.split("@")[0] || "there";
+  const navigate = useNavigate();
+
+  const displayName =
+    (user?.user_metadata?.username as string) ||
+    user?.email?.split("@")[0] ||
+    "there";
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      toast({
+        title: "Logout failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Signed out",
+      description: "You have been logged out.",
+    });
+
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div className="relative min-h-screen">
       <SiteOrbs />
       <SiteHeader />
+
       <main className="relative mx-auto w-full max-w-[1280px] px-4 py-12 md:px-6">
-        <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-          <span className="text-gradient-brand">Welcome, {displayName}</span>
-        </h1>
-        <p className="mt-2 text-muted-foreground">Manage your licenses, downloads and account.</p>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl">
+              <span className="text-gradient-brand">Welcome, {displayName}</span>
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Manage your licenses, downloads and account.
+            </p>
+          </div>
+
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="rounded-2xl"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
+          </Button>
+        </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="glass rounded-3xl p-5 shadow-[var(--shadow-card)]">
+            <div
+              key={s.label}
+              className="glass rounded-3xl p-5 shadow-[var(--shadow-card)]"
+            >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">{s.label}</span>
+                <span className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">
+                  {s.label}
+                </span>
                 <s.icon className="h-4 w-4 text-muted-foreground" />
               </div>
-              <div className="mt-3 text-3xl font-black tracking-tight">{s.value}</div>
+              <div className="mt-3 text-3xl font-black tracking-tight">
+                {s.value}
+              </div>
             </div>
           ))}
         </div>
 
         <div className="mt-10 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
           <div className="rounded-3xl border border-border bg-gradient-panel p-6 shadow-elegant">
-            <h2 className="text-xl font-extrabold tracking-tight">Your licenses</h2>
+            <h2 className="text-xl font-extrabold tracking-tight">
+              Your licenses
+            </h2>
             <div className="mt-5 rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               You don't own any licenses yet. Browse products to get started.
             </div>
           </div>
 
           <div className="rounded-3xl border border-border bg-gradient-panel p-6 shadow-elegant">
-            <h2 className="text-xl font-extrabold tracking-tight">Quick actions</h2>
+            <h2 className="text-xl font-extrabold tracking-tight">
+              Quick actions
+            </h2>
             <div className="mt-5 space-y-3">
-              {["Download loader", "Reset HWID", "Generate API key", "View invoices"].map((a) => (
+              {[
+                "Download loader",
+                "Reset HWID",
+                "Generate API key",
+                "View invoices",
+              ].map((a) => (
                 <button
                   key={a}
                   className="flex w-full items-center justify-between rounded-2xl border border-border bg-card/50 px-4 py-3 text-sm font-semibold transition-colors hover:border-foreground/20 hover:bg-secondary/60"
