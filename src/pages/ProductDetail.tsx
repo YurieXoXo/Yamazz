@@ -211,14 +211,14 @@ const ProductDetail = () => {
             Product preview
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Watch a quick overview of the interface and features.
+            Watch a quick overview of {product.name}.
           </p>
         
           <div className="mt-6 overflow-hidden rounded-3xl border border-border bg-card shadow-elegant">
             <div className="aspect-video w-full">
               <iframe
                 className="h-full w-full"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                src={product.videoUrl}
                 title={`${product.name} preview video`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
