@@ -16,12 +16,14 @@ export type Product = {
   features: { title: string; description: string }[];
   screenshots: { title: string; gradient: string }[];
   videoUrl: string;
+  image: string;
 };
 
 export const products: Product[] = [
   {
     slug: "csgo-2",
     name: "CSGO 2",
+    image: "/products/CSGO.png",
     tagline: "Legit and blatant",
     description: "A Polished and feature rich external to use on your main account!",
     category: "Updated",
@@ -48,6 +50,7 @@ export const products: Product[] = [
   {
     slug: "valorant",
     name: "Valorant",
+    image: "/products/Valo.png",
     tagline: "Legit",
     description: "The Best Undetected Aimlock on the market for legit play.",
     category: "Updated",
@@ -74,6 +77,7 @@ export const products: Product[] = [
   {
     slug: "arc-raiders",
     name: "Arc Raiders",
+    image: "/products/ARC.png",
     tagline: "Legit and blatant",
     description: "the Best external with many features for both legit and blatant cheating.",
     category: "Updated & live",
@@ -100,6 +104,7 @@ export const products: Product[] = [
   {
     slug: "roblox",
     name: "Roblox",
+    image: "/products/ROBLOX.png",
     tagline: "BETA",
     description: "A Perfect choise for both staying external and executing LUAVM scripts",
     category: "Undetected",
