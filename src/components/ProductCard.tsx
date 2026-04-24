@@ -53,7 +53,7 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
       </div>
 
       <div className="relative z-10 mt-5 overflow-hidden rounded-2xl border border-border bg-card/70 p-3 shadow-elegant">
-        <div <div className="aspect-[16/10] w-full">>
+        <div className="aspect-[16/10] w-full">>
           {logo ? (
             <img
               src={logo}
