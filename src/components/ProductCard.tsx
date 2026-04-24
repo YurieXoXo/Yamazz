@@ -52,13 +52,13 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
         </span>
       </div>
 
-      <div className="relative z-10 mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-elegant">
-        <div className="aspect-square w-full">
+      <div className="relative z-10 mt-5 overflow-hidden rounded-2xl border border-border bg-card/70 p-3 shadow-elegant">
+        <div <div className="aspect-[16/10] w-full">>
           {logo ? (
             <img
               src={logo}
               alt={`${product.name} logo`}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             />
           ) : (
