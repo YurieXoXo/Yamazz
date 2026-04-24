@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Calendar,
   KeyRound,
@@ -8,6 +8,7 @@ import {
   Wallet,
   Download,
   Activity,
+  ShoppingCart,
 } from "lucide-react";
 
 import SiteHeader from "@/components/SiteHeader";
@@ -30,6 +31,17 @@ type UserLicense = {
   } | null;
 };
 
+type PurchaseTicket = {
+  id: string;
+  product_name: string;
+  tier: string;
+  price: number;
+  payment_method: string;
+  status: string;
+  license_key: string | null;
+  created_at: string;
+};
+
 const DUMMY_DOWNLOAD_URL =
   "https://www.mediafire.com/file/2s9ccmzwdv4lhhd/favicon.ico/file";
 
@@ -41,6 +53,8 @@ const Dashboard = () => {
   const [activating, setActivating] = useState(false);
   const [loadingLicenses, setLoadingLicenses] = useState(true);
   const [licenses, setLicenses] = useState<UserLicense[]>([]);
+  const [purchaseTickets, setPurchaseTickets] = useState<PurchaseTicket[]>([]);
+  const [loadingPurchases, setLoadingPurchases] = useState(true);
 
   const displayName =
     (user?.user_metadata?.username as string) ||
@@ -89,8 +103,33 @@ const Dashboard = () => {
     setLicenses((data as UserLicense[]) || []);
   };
 
+  const fetchPurchaseTickets = async () => {
+    setLoadingPurchases(true);
+
+    const { data, error } = await supabase
+      .from("purchase_tickets")
+      .select(
+        "id, product_name, tier, price, payment_method, status, license_key, created_at"
+      )
+      .order("created_at", { ascending: false });
+
+    setLoadingPurchases(false);
+
+    if (error) {
+      toast({
+        title: "Failed to load purchase tickets",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPurchaseTickets((data as PurchaseTicket[]) || []);
+  };
+
   useEffect(() => {
     fetchLicenses();
+    fetchPurchaseTickets();
   }, []);
 
   const handleActivate = async (e: React.FormEvent) => {
@@ -210,9 +249,6 @@ const Dashboard = () => {
             <h2 className="text-2xl font-extrabold tracking-tight">
               Activate license
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Enter your license key to activate a product.
-            </p>
 
             <form className="mt-6 space-y-4" onSubmit={handleActivate}>
               <Input
@@ -236,9 +272,6 @@ const Dashboard = () => {
             <h2 className="text-2xl font-extrabold tracking-tight">
               Your licenses
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              All currently active licenses on your account.
-            </p>
 
             <div className="mt-6 space-y-4">
               {loadingLicenses ? (
@@ -267,13 +300,6 @@ const Dashboard = () => {
                             <ShieldCheck className="h-4 w-4" />
                             Status: {license.status}
                           </span>
-
-                          <span className="inline-flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            Activated:{" "}
-                            {new Date(license.activated_at).toLocaleString()}
-                          </span>
-
                           <span className="inline-flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
                             Expires:{" "}
@@ -297,6 +323,55 @@ const Dashboard = () => {
                 ))
               )}
             </div>
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-3xl border border-border bg-gradient-panel p-6 shadow-elegant">
+          <div className="flex items-center gap-3">
+            <ShoppingCart className="h-5 w-5" />
+            <h2 className="text-2xl font-extrabold tracking-tight">
+              Purchase tickets
+            </h2>
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Re-open your payment tickets here.
+          </p>
+
+          <div className="mt-6 space-y-4">
+            {loadingPurchases ? (
+              <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                Loading purchase tickets...
+              </div>
+            ) : purchaseTickets.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                No purchase tickets yet.
+              </div>
+            ) : (
+              purchaseTickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className="rounded-2xl border border-border bg-card/50 p-5"
+                >
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <div className="text-lg font-bold">
+                        {ticket.product_name}
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
+                        <span>Plan: {ticket.tier}</span>
+                        <span>Price: ${ticket.price}</span>
+                        <span>Payment: {ticket.payment_method}</span>
+                        <span>Status: {ticket.status}</span>
+                      </div>
+                    </div>
+
+                    <Button asChild variant="outline" className="rounded-2xl">
+                      <Link to={`/purchase/${ticket.id}`}>Open ticket</Link>
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
       </main>
