@@ -1,9 +1,18 @@
 import { Link } from "react-router-dom";
 import { Product, accentMap } from "@/data/products";
-import { ArrowRight, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+const productLogos: Record<string, string> = {
+  "arc-raiders": "/products/ARC.png",
+  "csgo-2": "/products/CSGO.png",
+  roblox: "/products/ROBLOX.png",
+  valorant: "/products/Valo.png",
+};
 
 const ProductCard = ({ product, index }: { product: Product; index: number }) => {
   const acc = accentMap[product.accent];
+  const logo = productLogos[product.slug];
+
   return (
     <Link
       to={`/products/${product.slug}`}
@@ -13,7 +22,7 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
         "--accent": acc.color,
         "--accentGlow": acc.glow,
       }}
-      className="group relative flex min-h-[360px] translate-y-6 flex-col overflow-hidden rounded-2xl border border-border bg-gradient-panel p-5 opacity-0 shadow-[var(--shadow-card)] transition-all duration-300 [animation:rise_0.85s_cubic-bezier(0.2,0.8,0.2,1)_forwards] hover:-translate-y-2 hover:border-foreground/10 hover:brightness-[1.03]"
+      className="group relative flex min-h-[420px] translate-y-6 flex-col overflow-hidden rounded-2xl border border-border bg-gradient-panel p-5 opacity-0 shadow-[var(--shadow-card)] transition-all duration-300 [animation:rise_0.85s_cubic-bezier(0.2,0.8,0.2,1)_forwards] hover:-translate-y-2 hover:border-foreground/10 hover:brightness-[1.03]"
     >
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-70 [animation:gridGlow_6s_ease-in-out_infinite] [mask-image:linear-gradient(180deg,rgba(0,0,0,1),rgba(0,0,0,0.68)_65%,transparent_100%)]"
@@ -22,9 +31,12 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
           backgroundSize: "8px 8px, 100% 100%",
         }}
       />
+
       <div
         className="pointer-events-none absolute inset-0 opacity-30"
-        style={{ background: `radial-gradient(circle at top center, rgb(${acc.color} / 0.18), transparent 42%)` }}
+        style={{
+          background: `radial-gradient(circle at top center, rgb(${acc.color} / 0.18), transparent 42%)`,
+        }}
       />
 
       <div className="relative z-10 flex items-start justify-between">
@@ -40,37 +52,69 @@ const ProductCard = ({ product, index }: { product: Product; index: number }) =>
         </span>
       </div>
 
-      <div className="relative z-10 mt-6 grid h-12 w-12 place-items-center overflow-hidden rounded-xl border border-border bg-secondary shadow-[0_6px_14px_hsl(0_0%_0%/0.28)]">
-        <div
-          className="absolute inset-[-50%] animate-spin-slow opacity-60"
-          style={{ background: `conic-gradient(from 180deg, transparent 10%, rgb(${acc.color} / 0.65), transparent 55%)` }}
-        />
-        <Zap className="relative z-10 h-5 w-5" style={{ color: `rgb(${acc.color})` }} />
+      <div className="relative z-10 mt-5 overflow-hidden rounded-2xl border border-border bg-card shadow-elegant">
+        <div className="aspect-square w-full">
+          {logo ? (
+            <img
+              src={logo}
+              alt={`${product.name} logo`}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div
+              className="grid h-full w-full place-items-center text-5xl font-black"
+              style={{ color: `rgb(${acc.color})` }}
+            >
+              {product.name.charAt(0)}
+            </div>
+          )}
+        </div>
       </div>
 
-      <h3 className="relative z-10 mt-4 text-3xl font-extrabold tracking-tight leading-none">{product.name}</h3>
+      <h3 className="relative z-10 mt-4 text-3xl font-extrabold leading-none tracking-tight">
+        {product.name}
+      </h3>
+
       <div className="relative z-10 mt-2 flex items-center gap-2 text-xs font-bold text-success">
         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-success shadow-[0_0_10px_hsl(var(--success)/0.55)]" />
         {product.status}
       </div>
-      <p className="relative z-10 mt-3 min-h-[57px] text-[13.2px] leading-snug text-muted-foreground">{product.description}</p>
+
+      <p className="relative z-10 mt-3 min-h-[57px] text-[13.2px] leading-snug text-muted-foreground">
+        {product.description}
+      </p>
 
       <div className="relative z-10 mt-auto border-t border-border/60 pt-2">
         <div className="flex items-center justify-between gap-3 border-b border-border/40 py-2.5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Platform</span>
-          <span className="text-xs font-bold text-foreground/80">{product.platform}</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Platform
+          </span>
+          <span className="text-xs font-bold text-foreground/80">
+            {product.platform}
+          </span>
         </div>
+
         <div className="flex items-center justify-between gap-3 py-2.5">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Type</span>
-          <span className="text-xs font-bold text-foreground/80">{product.type}</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            Type
+          </span>
+          <span className="text-xs font-bold text-foreground/80">
+            {product.type}
+          </span>
         </div>
       </div>
 
       <div className="relative z-10 mt-4 flex items-center justify-between gap-3">
         <div className="flex items-end gap-1.5 whitespace-nowrap">
-          <span className="-translate-y-0.5 text-xs font-bold text-muted-foreground">From</span>
-          <span className="text-3xl font-black leading-none tracking-tight">${product.pricing.day}</span>
+          <span className="-translate-y-0.5 text-xs font-bold text-muted-foreground">
+            From
+          </span>
+          <span className="text-3xl font-black leading-none tracking-tight">
+            ${product.pricing.day}
+          </span>
         </div>
+
         <span
           className="inline-flex items-center gap-1.5 rounded-full px-4 py-3 text-xs font-extrabold transition-transform group-hover:scale-[1.02]"
           style={{
