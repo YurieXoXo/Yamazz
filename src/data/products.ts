@@ -15,6 +15,7 @@ export type Product = {
   };
   features: { title: string; description: string }[];
   screenshots: { title: string; gradient: string }[];
+  videoUrl: string;
 };
 
 export const products: Product[] = [
@@ -42,6 +43,7 @@ export const products: Product[] = [
       { title: "Configurator", gradient: "from-amber-400/30 via-orange-500/20 to-pink-500/20" },
       { title: "Radar View", gradient: "from-red-400/30 via-orange-500/20 to-amber-400/20" },
     ],
+    videoUrl: "https://www.youtube.com/embed/YOUR_VIDEO_ID",
   },
   {
     slug: "valorant",
@@ -67,6 +69,7 @@ export const products: Product[] = [
       { title: "Loadout Profiles", gradient: "from-fuchsia-500/30 via-purple-500/20 to-pink-500/20" },
       { title: "Live Match", gradient: "from-pink-500/30 via-purple-500/20 to-fuchsia-500/20" },
     ],
+    videoUrl: "https://www.youtube.com/embed/YOUR_VIDEO_ID",
   },
   {
     slug: "arc-raiders",
@@ -92,6 +95,7 @@ export const products: Product[] = [
       { title: "Loot Highlights", gradient: "from-blue-500/30 via-cyan-400/20 to-teal-400/20" },
       { title: "Settings Panel", gradient: "from-teal-400/30 via-cyan-400/20 to-blue-500/20" },
     ],
+    videoUrl: "https://www.youtube.com/embed/YOUR_VIDEO_ID",
   },
   {
     slug: "roblox",
@@ -117,6 +121,7 @@ export const products: Product[] = [
       { title: "Script Hub", gradient: "from-rose-500/30 via-pink-500/20 to-fuchsia-500/20" },
       { title: "Live Injection", gradient: "from-fuchsia-500/30 via-pink-500/20 to-rose-500/20" },
     ],
+    videoUrl: "https://www.youtube.com/embed/YOUR_VIDEO_ID",
   },
 ];
 
